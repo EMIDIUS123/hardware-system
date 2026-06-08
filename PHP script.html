@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Stock Out - Sell Items</title>
+</head>
+<body>
+    <div class="navbar">
+        <h2 style="color: white; margin:0;">🛠️ Hardware System</h2>
+        <div><a href="/">Dashboard</a> | <a href="/purchase">Stock In</a> | <a href="/sell">Stock Out</a></div>
+    </div>
+    <div class="container">
+        <h1>Sell Hardware Items</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label>Customer Name:</label>
+                <input type="text" name="customer_name" placeholder="Optional">
+            </div>
+            <div class="form-group">
+                <label>Select Item to Sell:</label>
+                <select name="item_id">
+                    {% for id, item in inventory.items() %}
+                        <option value="{{ id }}">{{ item.name }} - Tsh {{ item.selling_price }} (Available: {{ item.stock }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Quantity:</label>
+                <input type="number" name="quantity" min="1" required>
+            </div>
+            <button type="submit" class="btn" style="background-color: #e74c3c;">Process Sale & Print Receipt</button>
+        </form>
+    </div>
+</body>
+</html>

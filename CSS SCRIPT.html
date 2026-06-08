@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Sale Receipt #{{ sale.receipt_id }}</title>
+    <style>
+        @media print { .no-print { display: none; } body { background: white; } .receipt-box { border: none; } }
+    </style>
+</head>
+<body>
+    <div class="receipt-box">
+        <div class="receipt-header">
+            <h2>KIZITO HARDWARE LTD</h2>
+            <p>Quality Building Materials</p>
+            <p><strong>RECEIPT NO: {{ sale.receipt_id }}</strong></p>
+        </div>
+        <div class="receipt-details">
+            <p><strong>Date:</strong> {{ sale.date }}</p>
+            <p><strong>Customer:</strong> {{ sale.customer }}</p>
+            <hr>
+            <p><strong>Item:</strong> {{ sale.item_name }}</p>
+            <p><strong>Qty x Price:</strong> {{ sale.quantity }} x Tsh {{ sale.price_per_unit }}</p>
+        </div>
+        <div class="receipt-total">
+            <p>TOTAL AMOUNT: Tsh {{ sale.total_amount }}</p>
+        </div>
+        <p style="text-align: center; margin-top: 20px; font-size: 0.9em;">Thank you for shopping with us!</p>
+        
+        <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print()" class="btn">Print Receipt</button>
+            <a href="/" style="margin-left: 10px; color: var(--primary);">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

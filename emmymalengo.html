@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Hardware Dashboard</title>
+</head>
+<body>
+    <div class="navbar">
+        <h2 style="color: white; margin:0;">🛠️ Hardware Management System</h2>
+        <div>
+            <a href="/">Dashboard</a>
+            <a href="/purchase">Stock In (Buy)</a>
+            <a href="/sell">Stock Out (Sell)</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Current Inventory Stock</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Product Name</th>
+                    <th>Buying Price</th>
+                    <th>Selling Price</th>
+                    <th>Available Stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for id, item in inventory.items() %}
+                <tr>
+                    <td>{{ id }}</td>
+                    <td>{{ item.name }}</td>
+                    <td>Tsh {{ item.buying_price }}</td>
+                    <td>Tsh {{ item.selling_price }}</td>
+                    <td style="font-weight: bold; color: {% if item.stock < 10 %}red{% else %}green{% endif %};">
+                        {{ item.stock }} units
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

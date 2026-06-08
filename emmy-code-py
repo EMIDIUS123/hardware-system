@@ -1,0 +1,89 @@
+from flask import Flask, render_template, request, redirect, url_for, flash
+from datetime import datetime
+
+app = Flask(__name__)
+app.secret_key = "hardware_secret_key"
+
+# In-memory database for demonstration purposes
+inventory = {
+    1: {"name": "Cement (42.5R)", "buying_price": 15000, "selling_price": 18000, "stock": 50},
+    2: {"name": "Iron Sheets (Gage 30)", "buying_price": 22000, "selling_price": 26000, "stock": 30},
+    3: {"name": "Steel Nails (3-inch, 1kg)", "buying_price": 3500, "selling_price": 4500, "stock": 100}
+}
+
+sales_history = []
+purchase_history = []
+
+@app.route('/')
+def dashboard():
+    return render_template('dashboard.html', inventory=inventory)
+
+# --- PURCHASE / BUYING COMPONENT ---
+@app.route('/purchase', methods=['GET', 'POST'])
+def purchase():
+    if request.method == 'POST':
+        item_id = int(request.form['item_id'])
+        quantity = int(request.form['quantity'])
+        cost_price = float(request.form['buying_price'])
+        
+        if item_id in inventory:
+            inventory[item_id]['stock'] += quantity
+            # Update buying price if it changed
+            inventory[item_id]['buying_price'] = cost_price
+            
+            purchase_history.append({
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                "item": inventory[item_id]['name'],
+                "quantity": quantity,
+                "total_cost": quantity * cost_price
+            })
+            flash(f"Successfully stocked {quantity} units of {inventory[item_id]['name']}", "success")
+        return redirect(url_for('dashboard'))
+        
+    return render_template('purchase.html', inventory=inventory)
+
+# --- SALES COMPONENT ---
+@app.route('/sell', methods=['GET', 'POST'])
+def sell():
+    if request.method == 'POST':
+        item_id = int(request.form['item_id'])
+        quantity = int(request.form['quantity'])
+        customer_name = request.form.get('customer_name', 'Walking Customer')
+        
+        if item_id in inventory:
+            item = inventory[item_id]
+            if item['stock'] >= quantity:
+                item['stock'] -= quantity
+                total_amount = quantity * item['selling_price']
+                
+                sale_record = {
+                    "receipt_id": len(sales_history) + 1001,
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "customer": customer_name,
+                    "item_name": item['name'],
+                    "quantity": quantity,
+                    "price_per_unit": item['selling_price'],
+                    "total_amount": total_amount
+                }
+                sales_history.append(sale_record)
+                
+                # Redirect straight to receipt generation
+                return redirect(url_for('receipt', receipt_id=sale_record['receipt_id']))
+            else:
+                flash("Error: Not enough stock available!", "danger")
+                
+        return redirect(url_for('dashboard'))
+        
+    return render_template('sell.html', inventory=inventory)
+
+# --- RECEIPT GENERATION COMPONENT ---
+@app.route('/receipt/<int:receipt_id>')
+def receipt(receipt_id):
+    sale = next((s for s in sales_history if s['receipt_id'] == receipt_id), None)
+    if not sale:
+        flash("Receipt not found!", "danger")
+        return redirect(url_for('dashboard'))
+    return render_template('receipt.html', sale=sale)
+
+if __name__ == '__main__':
+    app.run(debug=True)
